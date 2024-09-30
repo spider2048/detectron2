@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools", "torch", "opencv-contrib-python"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "detectron2"
+version = "0.6"
+
+description = "Detectron2 is FAIR's next-generation research platform for object detection and segmentation."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE" }
+keywords = ["detectron2", "pep-512", "deep-learning", "torch"]
+
+authors = [{ name = "Sp1d3R", email = "aspy1337@gmail.com" }, { name = "FAIR" }]
+
+maintainers = [{ name = "Sp1d3R", email = "aspy1337@gmail.com" }]
+
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Build Tools",
+
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3 :: Only",
+]
+
+dependencies = [
+    "torch",
+    "Pillow>=7.1",
+    "matplotlib",
+    "pycocotools>=2.0.2",
+    "termcolor>=1.1",
+    "yacs>=0.1.8",
+    "tabulate",
+    "cloudpickle",
+    "tqdm>4.29.0",
+    "tensorboard",
+    "fvcore>=0.1.5,<0.1.6",
+    "iopath>=0.1.7,<0.1.10",
+    "dataclasses; python_version<'3.7'",
+    "omegaconf>=2.1,<2.4",
+    "hydra-core>=1.1",
+    "packaging",
+]
+
+[project.optional-dependencies]
+dev = ["check-manifest"]
+test = ["coverage"]
+
+[project.urls]
+"Homepage" = "https://github.com/spider2048/detectron2"
+"Bug Reports" = "https://github.com/spider2048/detectron2/issues"
+"Source" = "https://github.com/spider2048/detectron2"
