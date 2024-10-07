@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools", "torch", "opencv-contrib-python"]
+requires = ["setuptools", "torch", "opencv-contrib-python-headless", "ninja"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "detectron2"
-version = "0.6"
+version = "0.6.0-1"
 
 description = "Detectron2 is FAIR's next-generation research platform for object detection and segmentation."
 readme = "README.md"
@@ -13,15 +13,12 @@ license = { file = "LICENSE" }
 keywords = ["detectron2", "pep-512", "deep-learning", "torch"]
 
 authors = [{ name = "Sp1d3R", email = "aspy1337@gmail.com" }, { name = "FAIR" }]
-
 maintainers = [{ name = "Sp1d3R", email = "aspy1337@gmail.com" }]
 
 classifiers = [
     "Development Status :: 5 - Production/Stable",
-
     "Intended Audience :: Developers",
     "Topic :: Software Development :: Build Tools",
-
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
@@ -29,7 +26,52 @@ classifiers = [
     "Programming Language :: Python :: 3 :: Only",
 ]
 
+dependencies = [
+    "Pillow",
+    "matplotlib",
+    "pycocotools>=2.0.2",
+    "termcolor>=1.1",
+    "yacs>=0.1.8",
+    "tabulate",
+    "cloudpickle",
+    "tqdm>4.29.0",
+    "tensorboard",
+    "fvcore>=0.1.5,<0.1.6",
+    "iopath>=0.1.7,<0.1.10",
+    "omegaconf>=2.1,<2.4",
+    "hydra-core>=1.1",
+    "packaging",
+    "torch",
+    "torchvision",
+]
+optional-dependencies = { "all" = [
+    "fairscale",
+    "timm",
+    "scipy>1.5.1",
+    "shapely",
+    "pygments>=2.2",
+    "psutil",
+    "panopticapi @ https://github.com/cocodataset/panopticapi/archive/master.zip",
+], "dev" = [
+    "flake8>=3.8.1",
+    "isort>=4.3.21",
+    "flake8-bugbear",
+    "flake8-comprehensions",
+    "black>=22.3.0",
+] }
+
 [project.urls]
 "Homepage" = "https://github.com/spider2048/detectron2"
 "Bug Reports" = "https://github.com/spider2048/detectron2/issues"
 "Source" = "https://github.com/spider2048/detectron2"
+
+[tool.setuptools.package-dir]
+"detectron2.projects.point_rend" = "projects/PointRend/point_rend"
+"detectron2.projects.deeplab" = "projects/DeepLab/deeplab"
+"detectron2.projects.panoptic_deeplab" = "projects/Panoptic-DeepLab/panoptic_deeplab"
+
+[tool.setuptools.packages.find]
+exclude = ["configs", "tests*"]
+
+[tool.setuptools.cmdclass]
+build_ext = "torch.utils.cpp_extension.BuildExtension"

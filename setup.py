@@ -5,43 +5,14 @@ import glob
 import os
 import shutil
 from os import path
-from setuptools import find_packages, setup
+from setuptools import setup
 from typing import List
 import torch
 from torch.utils.cpp_extension import CUDA_HOME, CppExtension, CUDAExtension
-
-torch_ver = [int(x) for x in torch.__version__.split(".")[:2]]
-assert torch_ver >= [1, 8], "Requires PyTorch >= 1.8"
-
-
-def get_version():
-    init_py_path = path.join(
-        path.abspath(path.dirname(__file__)), "detectron2", "__init__.py"
-    )
-    init_py = open(init_py_path, "r").readlines()
-    version_line = [l.strip() for l in init_py if l.startswith("__version__")][0]
-    version = version_line.split("=")[-1].strip().strip("'\"")
-
-    # The following is used to build release packages.
-    # Users should never use it.
-    suffix = os.getenv("D2_VERSION_SUFFIX", "")
-    version = version + suffix
-    if os.getenv("BUILD_NIGHTLY", "0") == "1":
-        from datetime import datetime
-
-        date_str = datetime.today().strftime("%y%m%d")
-        version = version + ".dev" + date_str
-
-        new_init_py = [l for l in init_py if not l.startswith("__version__")]
-        new_init_py.append('__version__ = "{}"\n'.format(version))
-        with open(init_py_path, "w") as f:
-            f.write("".join(new_init_py))
-    return version
-
+from pathlib import Path
 
 def get_extensions():
-    this_dir = path.dirname(path.abspath(__file__))
-    extensions_dir = path.join(this_dir, "detectron2", "layers", "csrc")
+    extensions_dir = path.join("detectron2", "layers", "csrc")
 
     main_source = path.join(extensions_dir, "vision.cpp")
     sources = glob.glob(path.join(extensions_dir, "**", "*.cpp"))
@@ -51,8 +22,6 @@ def get_extensions():
     is_rocm_pytorch = (
         True if ((torch.version.hip is not None) and (ROCM_HOME is not None)) else False
     )
-    if is_rocm_pytorch:
-        assert torch_ver >= [1, 8], "ROCM support requires PyTorch >= 1.8!"
 
     # common code between cuda and rocm platforms, for hipify version [1,0,0] and later.
     source_cuda = glob.glob(path.join(extensions_dir, "**", "*.cu")) + glob.glob(
@@ -88,12 +57,6 @@ def get_extensions():
         if nvcc_flags_env != "":
             extra_compile_args["nvcc"].extend(nvcc_flags_env.split(" "))
 
-        if torch_ver < [1, 7]:
-            # supported by https://github.com/pytorch/pytorch/pull/43931
-            CC = os.environ.get("CC", None)
-            if CC is not None:
-                extra_compile_args["nvcc"].append("-ccbin={}".format(CC))
-
     include_dirs = [extensions_dir]
 
     ext_modules = [
@@ -106,6 +69,10 @@ def get_extensions():
         )
     ]
 
+    print("Sources to compile =", sources)
+    print("include_dirs =", include_dirs)
+    print("macros =", define_macros)
+    print("extra_compile_args =", extra_compile_args)
     return ext_modules
 
 
@@ -151,51 +118,7 @@ PROJECTS = {
 }
 
 setup(
-    name="detectron2",
-    version=get_version(),
-    author="FAIR",
-    url="https://github.com/facebookresearch/detectron2",
-    description="Detectron2 is FAIR's next-generation research "
-    "platform for object detection and segmentation.",
-    packages=find_packages(exclude=("configs", "tests*")) + list(PROJECTS.keys()),
-    package_dir=PROJECTS,
     package_data={"detectron2.model_zoo": get_model_zoo_configs()},
-    python_requires=">=3.7",
-    install_requires=[
-        "Pillow>=7.1",
-        "matplotlib",
-        "pycocotools>=2.0.2",
-        "termcolor>=1.1",
-        "yacs>=0.1.8",
-        "tabulate",
-        "cloudpickle",
-        "tqdm>4.29.0",
-        "tensorboard",
-        "fvcore>=0.1.5,<0.1.6",
-        "iopath>=0.1.7,<0.1.10",
-        "dataclasses; python_version<'3.7'",
-        "omegaconf>=2.1,<2.4",
-        "hydra-core>=1.1",
-        "packaging",
-    ],
-    extras_require={
-        "all": [
-            "fairscale",
-            "timm",
-            "scipy>1.5.1",
-            "shapely",
-            "pygments>=2.2",
-            "psutil",
-            "panopticapi @ https://github.com/cocodataset/panopticapi/archive/master.zip",
-        ],
-        "dev": [
-            "flake8==3.8.1",
-            "isort==4.3.21",
-            "flake8-bugbear",
-            "flake8-comprehensions",
-            "black==22.3.0",
-        ],
-    },
     ext_modules=get_extensions(),
-    cmdclass={"build_ext": torch.utils.cpp_extension.BuildExtension},
+    include_package_data=False
 )
